@@ -76,7 +76,7 @@ export class News extends Component {
       <div className="container my-3">
         <h1
           className="text-center"
-          style={{ margin: "35px 0px", textTransform: "uppercase" }}
+          style={{ margin: "70px 0px", textTransform: "uppercase" }}
         >
           {this.props.category} - headlines
         </h1>
