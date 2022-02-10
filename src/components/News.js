@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import NewsItems from "./NewsItems";
 import Spinner from "./Spinner";
 import PropTypes from "prop-types";
+import InfiniteScroll from "react-infinite-scroll-component";
 export class News extends Component {
   static defaultProps = {
     country: "in",
@@ -58,7 +59,18 @@ export class News extends Component {
       this.updateNews(this.state.page + 1);
     }
   };
-
+  fetchMoreData = async () => {
+    this.setState({ page: this.page + 1 });
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&country=${this.props.category}&apiKey=3abe6be0a10b437c9e71d3f39d8d1511&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    this.setState({ loading: true });
+    let data = await fetch(url);
+    let parsedData = await data.json();
+    this.setState({
+      page: this.state.page,
+      articles: this.state.articles.concat(parsedData.articles),
+      loading: false,
+    });
+  };
   render() {
     return (
       <div className="container my-3">
@@ -68,10 +80,14 @@ export class News extends Component {
         >
           {this.props.category} - headlines
         </h1>
-        {this.state.loading && <Spinner />}
-        <div className="row">
-          {!this.state.loading &&
-            this.state.articles.map((element) => {
+        <InfiniteScroll
+          dataLength={this.state.articles.length}
+          next={this.fetchMoreData}
+          hasMore={this.state.articles.length !== this.totalResults}
+          loader={<Spinner />}
+        >
+          <div className="row">
+            {this.state.articles.map((element) => {
               return (
                 <div className="col-md-3" key={element.url}>
                   <NewsItems
@@ -89,10 +105,12 @@ export class News extends Component {
                 </div>
               );
             })}
-        </div>
+          </div>
+        </InfiniteScroll>
+
         <br />
         <hr />
-        <div className="container d-flex justify-content-around">
+        {/* <div className="container d-flex justify-content-around">
           <button
             disabled={this.state.page <= 1}
             className="btn btn-secondary"
@@ -111,7 +129,7 @@ export class News extends Component {
           >
             Next &raquo;
           </button>
-        </div>
+        </div> */}
       </div>
     );
   }
